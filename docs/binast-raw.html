@@ -8,17 +8,16 @@ David Teller, October 2017
 ## What it's about
 
 - Optimizing first byte sent to execution start.
-- Designed for multi-megabyte pages (Facebook, LinkedIn, ...).
-- ..by redesigning delivery of JavaScript code.
-- mozilla + Facebook + ...
+- Designed for multi-megabyte pages.
+- Project: mozilla + Facebook + ...
 
 ---
 
 ### Why?
 
-- Google Sheets, Google Docs, Yahoo, LinkedIn, Facebook: 3-7Mb+ JS code.
+- Google Sheets, Google Docs, Yahoo!, LinkedIn, Facebook: 3-7Mb+ JS code.
 - Updated very often.
-- Facebook: 500-900ms JS parsing.
+- Facebook: 500-900ms JS parsing (Chrome & Firefox).
 
 ---
 
@@ -27,7 +26,7 @@ David Teller, October 2017
 - 16ms- (sustained) Smooth
 - 40ms+ (sustained) Choppy
 - 50ms+ (single) Jank
-- 100ms+ (single) Broken
+- 100ms+ (single) Broken ⤶
 - 10s+ (single) Stopped responding
 
 ---
@@ -121,10 +120,22 @@ FunctionDeclaration {
 
 ### Future compatibility (2)
 
+```typescript
+// specs
+interface FunctionDeclaration {
+    name: Identifier;
+    body: BlockStatement;
+    args: [Arguments];
+    async: bool = false;
+    generator: bool = false;
+}
+```
+
 ```js
 // header
-"FunctionDeclaration": ["name", "body", "args", "async", "generator"],
+"FunctionDeclaration": ["name", "body", "args"]
 ```
+
 
 ---
 
@@ -197,7 +208,8 @@ Scope {
 ### Status
 
 - TC-39: stage 1.
-- Patches: review in progress.
+- Reference implementation: iterating.
+- SpiderMonkey: review in progress.
 - Size: not satisfying yet :/
 - Speed: cannot measure yet.
 
