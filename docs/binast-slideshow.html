@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>BinAST</title>
+	<link rel="stylesheet" href="assets/css/reveal/reveal.css">
+	<link rel="stylesheet" href="assets/css/reveal/theme/white.css">
+	<link rel="stylesheet" href="assets/css/highlight-hybrid.css">
+	<link rel="stylesheet" href="assets/css/slideshow.css">
+	<style>
+	</style>
+	<!--  -->
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section data-markdown
+			data-separator="(^#HSLIDE$|^#HSLIDE\?.*)"
+			data-separator-vertical="(^#VSLIDE$|^#VSLIDE\?.*)"
+			data-separator-notes="^Presentation note:"
+			data-charset="utf-8">
+			<script type="text/template">
+				# BinAST
+David Teller, October 2017
+
+
+---
+#HSLIDE
+
+## What it&#39;s about
+
+- Optimizing first byte sent to execution start.
+- Designed for multi-megabyte pages (Facebook, LinkedIn, ...).
+- ..by redesigning delivery of JavaScript code.
+- mozilla + Facebook + ...
+
+
+---
+#VSLIDE
+
+### Why?
+
+- Google Sheets, Google Docs, Yahoo, LinkedIn, Facebook: 3-7Mb+ JS code.
+- Updated very often.
+- Facebook: 500-900ms JS parsing.
+
+
+---
+#VSLIDE
+
+### About jank
+
+-  16ms- (sustained) Smooth
+-  40ms+ (sustained) Choppy
+-  50ms+ (single) Jank
+-  100ms+ (single) Broken
+-  10s+ (single) Stopped responding
+
+
+---
+#VSLIDE
+
+### JS source text is an inefficient medium
+
+- ambiguous/complex (⇒ slow tokenization/parsing);
+- flat + `SyntaxError` semantics (⇒ cannot skip/parallelize);
+- repeated (⇒ minimizers).
+
+
+---
+#VSLIDE
+
+### What about JS source binary?
+Experiments suggest we can have:
+
+
+- parsing speed 3x;
+- lazy parsing speed 8x;
+- smaller payload than minimized code.
+
+**Not** actual benchmarks.
+
+
+---
+#HSLIDE
+
+## Alternatives
+
+---
+#VSLIDE
+
+### Minimizers
+
+- ⊕ simple for web devs;
+- ⊖ not very good;
+- ⊖ kills readability/debuggability.
+
+
+---
+#VSLIDE
+
+### Lazy loading
+
+- ⊕ better startup time;
+- ⊖ doesn&#39;t scale up.
+
+
+---
+#VSLIDE
+
+### Syntax parsing
+
+- ⊕ transparent for web devs;
+- ⊖ not good enough.
+
+
+---
+#VSLIDE
+
+### Google
+&quot;Prefetch &amp; compile your code from ServiceWorkers.&quot;
+
+
+- ⊕ simple for **browser** devs
+- ⊖ bandwidth, battery, server energy, memory cost;
+- ⊖ complex for web devs.
+
+
+---
+#HSLIDE
+
+## Towards (binary) AST
+
+---
+#VSLIDE
+
+### The AST
+
+- future compatible?
+- size efficient?
+- speed efficient?
+
+
+---
+#VSLIDE
+
+### Future compatibility
+```js
+function foo() {
+    // ...
+}
+```
+```rust
+FunctionDeclaration {
+  name: Identifier("foo"),
+  body: ...,
+  args: [],
+  async: false,     // ES6
+  generator: false, // ES6
+}
+```
+
+---
+#VSLIDE
+
+### Future compatibility (2)
+```js
+// header
+"FunctionDeclaration": ["name", "body", "args", "async", "generator"],
+```
+
+---
+#VSLIDE
+
+### Speed efficiency (1)
+
+- No string sniffing.
+- Relax `SyntaxError` to allow skipping functions.
+
+
+---
+#VSLIDE
+
+### Speed efficiency (2)
+
+- Don&#39;t **build** proofs, **check** them:
+
+```js
+Scope {
+    const: ["x", "y"],
+    let: ["a"],
+    var: [],
+    captured: ["z"],
+    hasDirectEval: false,
+}
+```
+
+---
+#HSLIDE
+
+## Towards a binary (AST)
+
+---
+#VSLIDE
+
+### Binary?
+
+- future compatible?
+- size efficient?
+- speed efficient?
+
+
+---
+#VSLIDE
+
+### Layout
+
+1. header
+1. grammar table;
+1. atoms table;
+1. tree(s);
+1. comments? (TBD)
+
+
+---
+#VSLIDE
+
+### Size efficiency
+
+- do not repeat strings/atoms/identifiers/properties;
+- use grammar table as a compression mechanism
+- compress everything.
+
+
+---
+#VSLIDE
+
+### Speed efficiency (2)
+
+- atoms table may be parsed early/concurrently;
+- grammar table may be rejected early;
+- (some) subtrees may be skipped/parallelized.
+
+
+---
+#HSLIDE
+
+## Conclusions
+
+---
+#VSLIDE
+
+### Status
+
+- TC-39: stage 1.
+- Patches: review in progress.
+- Size: not satisfying yet :/
+- Speed: cannot measure yet.
+
+
+---
+#VSLIDE
+
+### Next steps
+
+- Land JS shell-only version.
+- Measure speed.
+- Bind to DOM.
+- Limited opt-in test with Facebook.
+
+
+---
+#VSLIDE
+
+### Want to join?
+
+- IRC: `#binjs`
+- Newsgroup/mailing-list: `dev-binast`
+
+
+			</script>
+		</section>
+	</div>
+</div>
+
+<script src="assets/js/reveal/reveal.js"></script>
+<script src="assets/js/reveal/lib/head.min.js"></script>
+<script src="assets/js/jquery.js"></script>
+<script>
+Reveal.initialize({
+	embedded: true,
+	margin: 0.0,
+	showNotes: false,
+	transition: 'slide',
+	autoSlide: 0,
+	loop: false,
+	center: true,
+	rtl: false,
+	shuffle: false,
+	mouseWheel: false,
+	history: true,
+
+	// disabled for now
+	// math: {
+	// 	mathjax: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js',
+	// 	config: 'TeX-AMS_HTML-full'
+	// },
+
+	dependencies: [
+		{ src: "assets/js/reveal/plugin/markdown/marked.js"},
+		{ src: "assets/js/reveal/plugin/markdown/markdown.js"},
+		{ src: "assets/js/reveal/plugin/notes/notes.js"},
+		// { src: "assets/js/reveal/plugin/math/math.js", async: true }
+		{ src: "assets/js/reveal/plugin/highlight/highlight.js", async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+	]
+});
+
+Reveal.configure({
+	keyboard: {
+		67: function() { // bind "s" key to "select" code block content
+
+		var currentSlide = Reveal.getCurrentSlide();
+		var preBlock = $(currentSlide).find("pre");
+
+		if(preBlock.length > 0) {
+
+			if (window.getSelection) {
+				var range = document.createRange();
+				range.selectNodeContents(preBlock[0]);
+				var selection = window.getSelection();
+				selection.removeAllRanges();
+				selection.addRange(range);
+			}
+		}
+	}
+}
+});
+
+</script>
+
+</body>
+</html>

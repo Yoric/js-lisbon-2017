@@ -1,0 +1,346 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>BinAST - Web site</title>
+		<link rel="stylesheet" href="assets/css/highlight.min.css">
+		<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+		<link rel="stylesheet" href="assets/css/tipuesearch.css">
+		<link rel="stylesheet" href="assets/css/main.css">
+	</head>
+	<body>
+		<header class="navbar navbar-default navbar-fixed-top">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="">Web site</a> <p class="navbar-text hidden-xs">BinAST</p>
+				</div>
+
+				<div class="collapse navbar-collapse" id="navbar-collapse-1">
+					<form action="search.html" class="navbar-form navbar-right" role="search">
+						<div class="form-group">
+							<input type="text" name="q" id="tipue_search_input" autocomplete="off" required class="form-control" placeholder="Search">
+						</div>
+					</form>
+					<ul class="nav navbar-nav navbar-right">
+						<li><a href="binast-slideshow.html" target="_blank">View as slideshow</a></li>
+						<!--li><a href="binast-raw.html">View Markdown</a></li-->
+					</ul>
+				</div>
+			</div>
+		</header>
+
+		<!--
+<div class="toc">
+<p class="lead">Table of contents:</p>
+<p class="toc-1">
+<a href="#binast">BinAST</a>
+</p>
+<p class="toc-2">
+<a href="#what-it-39-s-about">What it&amp;#39;s about</a>
+</p>
+<p class="toc-3">
+<a href="#why-">Why?</a>
+</p>
+<p class="toc-3">
+<a href="#about-jank">About jank</a>
+</p>
+<p class="toc-3">
+<a href="#js-source-text-is-an-inefficient-medium">JS source text is an inefficient medium</a>
+</p>
+<p class="toc-3">
+<a href="#what-about-js-source-binary-">What about JS source binary?</a>
+</p>
+<p class="toc-2">
+<a href="#alternatives">Alternatives</a>
+</p>
+<p class="toc-3">
+<a href="#minimizers">Minimizers</a>
+</p>
+<p class="toc-3">
+<a href="#lazy-loading">Lazy loading</a>
+</p>
+<p class="toc-3">
+<a href="#syntax-parsing">Syntax parsing</a>
+</p>
+<p class="toc-3">
+<a href="#google">Google</a>
+</p>
+<p class="toc-2">
+<a href="#towards-binary-ast">Towards (binary) AST</a>
+</p>
+<p class="toc-3">
+<a href="#the-ast">The AST</a>
+</p>
+<p class="toc-3">
+<a href="#future-compatibility">Future compatibility</a>
+</p>
+<p class="toc-3">
+<a href="#future-compatibility-2-">Future compatibility (2)</a>
+</p>
+<p class="toc-3">
+<a href="#speed-efficiency-1-">Speed efficiency (1)</a>
+</p>
+<p class="toc-3">
+<a href="#speed-efficiency-2-">Speed efficiency (2)</a>
+</p>
+<p class="toc-2">
+<a href="#towards-a-binary-ast-">Towards a binary (AST)</a>
+</p>
+<p class="toc-3">
+<a href="#binary-">Binary?</a>
+</p>
+<p class="toc-3">
+<a href="#layout">Layout</a>
+</p>
+<p class="toc-3">
+<a href="#size-efficiency">Size efficiency</a>
+</p>
+<p class="toc-3">
+<a href="#speed-efficiency-2-">Speed efficiency (2)</a>
+</p>
+<p class="toc-2">
+<a href="#conclusions">Conclusions</a>
+</p>
+<p class="toc-3">
+<a href="#status">Status</a>
+</p>
+<p class="toc-3">
+<a href="#next-steps">Next steps</a>
+</p>
+<p class="toc-3">
+<a href="#want-to-join-">Want to join?</a>
+</p>
+</div>
+-->
+
+		<div class="container">
+			<div class="row">
+				<nav id="sidebar" class="col-lg-2 col-sm-3">
+					<ul class="nav nav-pills nav-stacked">
+					</ul>
+					<!--
+Available versions:<br>
+raw<br>
+->binast-raw.html<br>
+slideshow<br>
+->binast-slideshow.html<br>
+default<br>
+->binast.html<br>
+<br>
+Document informations:<br>
+binast.md<br><br>
+active
+-->
+				</nav>
+				<header>
+					<div class="entry-meta text-right">
+
+					</div>
+				</header>
+				<article id="content" class="col-lg-10 col-sm-9">
+					<h1 id="binast">BinAST</h1>
+<p>David Teller, October 2017</p>
+<hr>
+<h2 id="what-it-39-s-about">What it&#39;s about</h2>
+<ul>
+<li>Optimizing first byte sent to execution start.</li>
+<li>Designed for multi-megabyte pages (Facebook, LinkedIn, ...).</li>
+<li>..by redesigning delivery of JavaScript code.</li>
+<li>mozilla + Facebook + ...</li>
+</ul>
+<hr>
+<h3 id="why-">Why?</h3>
+<ul>
+<li>Google Sheets, Google Docs, Yahoo, LinkedIn, Facebook: 3-7Mb+ JS code.</li>
+<li>Updated very often.</li>
+<li>Facebook: 500-900ms JS parsing.</li>
+</ul>
+<hr>
+<h3 id="about-jank">About jank</h3>
+<ul>
+<li>16ms- (sustained) Smooth</li>
+<li>40ms+ (sustained) Choppy</li>
+<li>50ms+ (single) Jank</li>
+<li>100ms+ (single) Broken</li>
+<li>10s+ (single) Stopped responding</li>
+</ul>
+<hr>
+<h3 id="js-source-text-is-an-inefficient-medium">JS source text is an inefficient medium</h3>
+<ul>
+<li>ambiguous/complex (⇒ slow tokenization/parsing);</li>
+<li>flat + <code>SyntaxError</code> semantics (⇒ cannot skip/parallelize);</li>
+<li>repeated (⇒ minimizers).</li>
+</ul>
+<hr>
+<h3 id="what-about-js-source-binary-">What about JS source binary?</h3>
+<p>Experiments suggest we can have:</p>
+<ul>
+<li>parsing speed 3x;</li>
+<li>lazy parsing speed 8x;</li>
+<li>smaller payload than minimized code.</li>
+</ul>
+<p><strong>Not</strong> actual benchmarks.</p>
+<hr>
+<h2 id="alternatives">Alternatives</h2>
+<hr>
+<h3 id="minimizers">Minimizers</h3>
+<ul>
+<li>⊕ simple for web devs;</li>
+<li>⊖ not very good;</li>
+<li>⊖ kills readability/debuggability.</li>
+</ul>
+<hr>
+<h3 id="lazy-loading">Lazy loading</h3>
+<ul>
+<li>⊕ better startup time;</li>
+<li>⊖ doesn&#39;t scale up.</li>
+</ul>
+<hr>
+<h3 id="syntax-parsing">Syntax parsing</h3>
+<ul>
+<li>⊕ transparent for web devs;</li>
+<li>⊖ not good enough.</li>
+</ul>
+<hr>
+<h3 id="google">Google</h3>
+<p>&quot;Prefetch &amp; compile your code from ServiceWorkers.&quot;</p>
+<ul>
+<li>⊕ simple for <strong>browser</strong> devs</li>
+<li>⊖ bandwidth, battery, server energy, memory cost;</li>
+<li>⊖ complex for web devs.</li>
+</ul>
+<hr>
+<h2 id="towards-binary-ast">Towards (binary) AST</h2>
+<hr>
+<h3 id="the-ast">The AST</h3>
+<ul>
+<li>future compatible?</li>
+<li>size efficient?</li>
+<li>speed efficient?</li>
+</ul>
+<hr>
+<h3 id="future-compatibility">Future compatibility</h3>
+<pre><code class="lang-js">function foo() {
+    // ...
+}
+</code></pre>
+<pre><code class="lang-rust">FunctionDeclaration {
+  name: Identifier(&quot;foo&quot;),
+  body: ...,
+  args: [],
+  async: false,     // ES6
+  generator: false, // ES6
+}
+</code></pre>
+<hr>
+<h3 id="future-compatibility-2-">Future compatibility (2)</h3>
+<pre><code class="lang-js">// header
+&quot;FunctionDeclaration&quot;: [&quot;name&quot;, &quot;body&quot;, &quot;args&quot;, &quot;async&quot;, &quot;generator&quot;],
+</code></pre>
+<hr>
+<h3 id="speed-efficiency-1-">Speed efficiency (1)</h3>
+<ul>
+<li>No string sniffing.</li>
+<li>Relax <code>SyntaxError</code> to allow skipping functions.</li>
+</ul>
+<hr>
+<h3 id="speed-efficiency-2-">Speed efficiency (2)</h3>
+<ul>
+<li>Don&#39;t <strong>build</strong> proofs, <strong>check</strong> them:</li>
+</ul>
+<pre><code class="lang-js">Scope {
+    const: [&quot;x&quot;, &quot;y&quot;],
+    let: [&quot;a&quot;],
+    var: [],
+    captured: [&quot;z&quot;],
+    hasDirectEval: false,
+}
+</code></pre>
+<hr>
+<h2 id="towards-a-binary-ast-">Towards a binary (AST)</h2>
+<hr>
+<h3 id="binary-">Binary?</h3>
+<ul>
+<li>future compatible?</li>
+<li>size efficient?</li>
+<li>speed efficient?</li>
+</ul>
+<hr>
+<h3 id="layout">Layout</h3>
+<ol>
+<li>header</li>
+<li>grammar table;</li>
+<li>atoms table;</li>
+<li>tree(s);</li>
+<li>comments? (TBD)</li>
+</ol>
+<hr>
+<h3 id="size-efficiency">Size efficiency</h3>
+<ul>
+<li>do not repeat strings/atoms/identifiers/properties;</li>
+<li>use grammar table as a compression mechanism</li>
+<li>compress everything.</li>
+</ul>
+<hr>
+<h3 id="speed-efficiency-2-">Speed efficiency (2)</h3>
+<ul>
+<li>atoms table may be parsed early/concurrently;</li>
+<li>grammar table may be rejected early;</li>
+<li>(some) subtrees may be skipped/parallelized.</li>
+</ul>
+<hr>
+<h2 id="conclusions">Conclusions</h2>
+<hr>
+<h3 id="status">Status</h3>
+<ul>
+<li>TC-39: stage 1.</li>
+<li>Patches: review in progress.</li>
+<li>Size: not satisfying yet :/</li>
+<li>Speed: cannot measure yet.</li>
+</ul>
+<hr>
+<h3 id="next-steps">Next steps</h3>
+<ul>
+<li>Land JS shell-only version.</li>
+<li>Measure speed.</li>
+<li>Bind to DOM.</li>
+<li>Limited opt-in test with Facebook.</li>
+</ul>
+<hr>
+<h3 id="want-to-join-">Want to join?</h3>
+<ul>
+<li>IRC: <code>#binjs</code></li>
+<li>Newsgroup/mailing-list: <code>dev-binast</code></li>
+</ul>
+
+				</article>
+			</div>
+		</div>
+
+		<footer><a href="site-index.html">Pages index</a>
+</footer>
+
+		<script src="assets/js/jquery.js"></script>
+		<script src="assets/js/bootstrap.min.js"></script>
+		<script src="assets/js/highlight.min.js"></script>
+		<script src="assets/js/tipuesearch_set.js"></script>
+		<script src="assets/js/tipuesearch.min.js"></script>
+		<script>
+			$(function() {
+				hljs.initHighlightingOnLoad();
+				$('#tipue_search_input').tipuesearch({
+					mode: 'json',
+					contentLocation: 'index.json'
+				});
+			});
+		</script>
+		
+		<!-- Generated by Vegetables from 'binast.md' with format 'default' - '10/17/2017, 9:15:21 AM' -->
+	</body>
+</html>
