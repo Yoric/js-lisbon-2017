@@ -22,7 +22,7 @@
 			data-charset="utf-8">
 			<script type="text/template">
 				# BinAST
-David Teller, October 2017
+David Teller/Yoric, October 2017
 
 
 ---
@@ -70,10 +70,11 @@ David Teller, October 2017
 ---
 #VSLIDE
 
-### What about JS source binary?
-Experiments suggest we can have:
+### Can we do better?
+Experiments with a binary format suggest we can have:
 
 
+-  1:1 match with source text;
 - parsing speed 3x;
 - lazy parsing speed 8x;
 - smaller payload than minimized code.
@@ -102,7 +103,8 @@ Experiments suggest we can have:
 ### Lazy loading
 
 - ⊕ better startup time;
-- ⊖ doesn&#39;t scale up.
+- ⊖ hard for web devs;
+- ⊖ quickly makes things worse.
 
 
 ---
@@ -123,7 +125,7 @@ Experiments suggest we can have:
 
 - ⊕ simple for **browser** devs
 - ⊖ bandwidth, battery, server energy, memory cost;
-- ⊖ complex for web devs.
+- ⊖ really complex for web devs.
 
 
 ---
@@ -264,9 +266,10 @@ Scope {
 
 - TC-39: stage 1.
 - Reference implementation: iterating.
-- SpiderMonkey: review in progress.
+- SpiderMonkey: almost ready to land.
 - Size: not satisfying yet :/
 - Speed: cannot measure yet.
+- Safety: iterating.
 
 
 ---
@@ -275,6 +278,7 @@ Scope {
 ### Next steps
 
 - Land JS shell-only version.
+- Well-formed AST.
 - Measure speed.
 - Bind to DOM.
 - Limited opt-in test with Facebook.
