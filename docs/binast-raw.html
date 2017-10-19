@@ -8,7 +8,7 @@ David Teller/Yoric, October 2017
 ## What it's about
 
 - Optimizing first byte sent to execution start.
-- Designed for multi-megabyte pages.
+- In particular multi-megabyte pages.
 - Project: mozilla + Facebook + ...
 
 ---
@@ -16,8 +16,8 @@ David Teller/Yoric, October 2017
 ### Why?
 
 - Google Sheets, Google Docs, Yahoo!, LinkedIn, Facebook: 3-7Mb+ JS code.
-- Updated very often.
-- Facebook: 500-900ms JS parsing (Chrome & Firefox).
+- Updated *very* often.
+- Facebook: 500-900ms just building the JS AST (Chrome & Firefox).
 
 ---
 
@@ -26,7 +26,7 @@ David Teller/Yoric, October 2017
 - 16ms- (sustained) Smooth
 - 40ms+ (sustained) Choppy
 - 50ms+ (single) Jank
-- 100ms+ (single) Broken ⤶
+- 100ms+ (single) Broken **⤶**
 - 10s+ (single) Stopped responding
 
 ---
@@ -137,29 +137,49 @@ interface FunctionDeclaration {
 "FunctionDeclaration": ["name", "body", "args"]
 ```
 
+---
+
+### Future compatibility (3)
+
+Amending the standard:
+
+- **add** a new virtual or concrete interface;
+- **subclass** an existing interface with a new interface;
+- **extend** an interface to add with new fields;
+- **generalize** a sum of interfaces to add more interfaces;
+- **extend** an enum with new cases.
+
+This assumes that the language can only grow, without backwards-incompatible syntax changes.
 
 ---
 
 ### Speed efficiency (1)
 
 - No string sniffing.
-- Relax `SyntaxError` to allow skipping functions.
+- Delay `SyntaxError` to function execution (allows lazy/concurrent parsing).
 
 ---
 
 ### Speed efficiency (2)
 
-- Don't **build** proofs, **check** them:
-
+- Don't **build** proofs, **check** them.
+- Remove reasons to need to walk subtrees to collect all data.
+- e.g. scope:
 ```js
 Scope {
+    // Variables declared in this scope.
     const: ["x", "y"],
     let: ["a"],
     var: [],
-    captured: ["z"],
+
+    // Captured by some inner function.
+    captured: ["x"],
+
+    // Cannot optimize due to `eval` in the subtree.
     hasDirectEval: false,
 }
 ```
+- e.g. tree wellf-formedness.
 
 ---
 
@@ -181,14 +201,16 @@ Scope {
 2. grammar table;
 3. atoms table;
 4. tree(s);
-5. comments? (TBD)
+5. comments, sourcemaps? (TBD)
+
 
 ---
+
 
 ### Size efficiency
 
 - do not repeat strings/atoms/identifiers/properties;
-- use grammar table as a compression mechanism
+- use grammar table as a compression mechanism;
 - compress everything.
 
 
@@ -196,7 +218,8 @@ Scope {
 
 ### Speed efficiency (2)
 
-- atoms table may be parsed early/concurrently;
+- atoms table may be parsed/checked/interned early/concurrently;
+- identifiers may be checked a single time;
 - grammar table may be rejected early;
 - (some) subtrees may be skipped/parallelized.
 
